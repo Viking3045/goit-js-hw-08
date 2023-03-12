@@ -1,5 +1,5 @@
 import Player from '@vimeo/player';
-import throttle from "lodash.throttle"
+import throttle from 'lodash.throttle';
 const iframe = document.querySelector('iframe');
     const player = new Player(iframe);
 player.on('play', function() {
@@ -12,16 +12,22 @@ player.on('play', function() {
 
 
 const onPlay = function (data) {
-    console.log(data.seconds)
+    localStorage.setItem("videoplayer-current-time", data.seconds);
 };
-const curentTime = data.seconds
-player.on('timeupdate', onPlay);
-localStorage.setItem("videoplayer-current-time", "data.seconds");
-player.setCurrentTime(curentTime)
+player.on('timeupdate', throttle(onPlay, 1000));
+const currentTime = Number(localStorage.getItem('videoplayer-current-time'))
+// const theme = localStorage.getItem("videoplayer-current-time")
+console.log(currentTime)
+player.setCurrentTime(currentTime).then(function(seconds) {
+    // seconds = the actual time that the player seeked to
+}).catch(function(error) {
+    switch (error.name) {
+        case 'RangeError':
+            // the time was less than 0 or greater than the video’s duration
+            break;
 
-// document.addEventListener(
-//   "timeupdate",
-//   _.throttle(() => {
-//     console.log("Scroll handler call every 300ms");
-//   }, 100000)
-// );
+        default:
+            // some other error occurred
+            break;
+    }
+});
